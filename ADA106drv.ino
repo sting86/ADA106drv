@@ -222,7 +222,11 @@ class AnimFire: public Animation {
 class AnimWater: public Animation {
 
   public:
-    AnimWater(): speed(50) , mass(127), diversity(50) {};
+    enum PaletteType {
+      PALETTE_BLUE,
+      PALETTE_RED
+    };
+    AnimWater(): speed(50) , mass(127), diversity(25), palette(PALETTE_RED) {};
     virtual void nextFrame() {
 
       static byte heat[NUM_LEDS];
@@ -242,11 +246,37 @@ class AnimWater: public Animation {
 
       delay(speed);
     }
-
+  private:   
     uint32_t getPalette (uint8_t hue) {
+        switch (palette) {
+          case PALETTE_BLUE:
+            return getPaletteBlue(hue);
+          break;
+
+          case PALETTE_RED:
+            return getPaletteFire(hue);
+          break;
+
+          default:
+            return 20;
+        }
         return (Adafruit_NeoPixel::Color(hue, hue/5, 255));
     }
-  private:
+
+    inline uint32_t getPaletteBlue (uint8_t hue) {
+        return (Adafruit_NeoPixel::Color(hue, hue/5, 255));
+    }
+    
+    inline uint32_t getPaletteFire (uint8_t hue) {
+//        return (Adafruit_NeoPixel::Color((hue)/3, 255, (hue)/10)); 
+
+        if (hue < 128 ){
+          return (Adafruit_NeoPixel::Color(0, 127+hue, 0));
+        } else {
+          return (Adafruit_NeoPixel::Color((hue-127)/3, 255, (hue-127)/10));
+        }
+    }
+    PaletteType palette;
     uint8_t diversity;
     uint8_t mass;
     uint8_t speed;
